@@ -92,10 +92,50 @@ class SemanticNetwork:
                 and (rel == None or d.relation.name == rel)
                 and (e2 == None or d.relation.entity2 == e2) ]
         return self.query_result
+
     def show_query_result(self):
         for d in self.query_result:
             print(str(d))
+    
+    # 1.1
+    def list_associations(self):
+        return list(set([d.relation.name for d in self.declarations if isinstance(d.relation, Association)]))
 
+    # 1.2
+    def list_objects(self):
+        return list(set([d.relation.entity1 for d in self.declarations if isinstance(d.relation, Member)]))
+
+    # 1.3
+    def list_users(self):
+        return list(set([d.user for d in self.declarations]))
+    
+    
+    # 1.4
+    def list_types(self):
+        return list(set(
+            [d.relation.entity1 for d in self.declarations if isinstance(d.relation, Subtype)] +
+            [d.relation.entity2 for d in self.declarations if isinstance(d.relation, Member) or isinstance(d.relation, Subtype)]
+        ))
+
+    # 1.5
+    def list_local_associations(self, entity):
+        return list(set(d.relation.name for d in self.declarations if isinstance(d.relation, Association) and entity in [d.relation.entity1, d.relation.entity2]))
+
+    # 1.6
+    def list_relations_by_user(self, user):
+        return list(set(d.relation.name for d in self.declarations if d.user == user))
+
+    # 1.7
+    def associations_by_user(self, user):
+        return len(set([d.relation.name for d in self.declarations if isinstance(d.relation, Association) and d.user==user]))
+
+    # 1.8
+    def list_local_associations_by_user(self, entity):
+        return list(set([(d.relation.name, d.user) for d in self.declarations if isinstance(d.relation, Association) and entity in [d.relation.entity1, d.relation.entity2]]))
+
+    # 1.9
+    def predecessor(self, A, B):
+        pass
 
 # Funcao auxiliar para converter para cadeias de caracteres
 # listas cujos elementos sejam convertiveis para
