@@ -71,5 +71,15 @@ Declaration('descartes',Association('homem','altura',1.75)), \
 Declaration('simao',Association('homem','altura',1.85)), \
 Declaration('darwin',Association('homem','altura',1.75))] )
 
+    assert compare_decl_lists(sn_net.query_down('homem', 'altura'), [
+Declaration('descartes',Association('homem','altura',1.75)), \
+Declaration('simao',Association('homem','altura',1.85)), \
+Declaration('darwin',Association('homem','altura',1.75)), \
+Declaration('descartes',Association('homem','altura',1.75)), \
+Declaration('simao',Association('homem','altura',1.85)), \
+Declaration('darwin',Association('homem','altura',1.75)), \
+Declaration('descartes',Association('homem','altura',1.75)), \
+Declaration('simao',Association('homem','altura',1.85)), \
+Declaration('darwin',Association('homem','altura',1.75))] )
 
 
