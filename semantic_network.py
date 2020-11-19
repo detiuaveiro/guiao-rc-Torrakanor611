@@ -135,7 +135,40 @@ class SemanticNetwork:
 
     # 1.9
     def predecessor(self, A, B):
-        pass
+        predec_b = [d.relation.entity2 for d  in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity1 == B]
+        return A in predec_b or any([self.predecessor(A, p) for p in predec_b])
+
+    # 1.10
+    def predecessor_path(self, A, B):
+        if not self.predecessor(A, B):
+            return None
+        predec_b = [d.relation.entity2 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity1 == B]
+
+        if A in predec_b:
+            return [A, B]
+        
+        for predec in predec_b:
+            path = self.predecessor_path(A, predec)
+            if path != None:
+                return path + [B]
+        return None
+
+    # 1.11a
+    def query(self, entity, assoc = None):
+        parents = [d.relation.entity2 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity1 == entity]
+        
+        ldecl = [d for d in self.query_local(e1 = entity, rel = assoc) if isinstance(d.relation, Association)]
+        for p in parents:
+            ldecl += self.query(p, assoc)
+        return ldecl
+
+    # 1.11b
+    def query2(self, entity, rel = None):
+        ldecl = [d for d in self.query_local(e1 = entity, rel = rel) if not isinstance(d.relation, Association)]
+        return ldecl + self.query(entity, rel)
+
+
+        
 
 # Funcao auxiliar para converter para cadeias de caracteres
 # listas cujos elementos sejam convertiveis para
