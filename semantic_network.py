@@ -1,4 +1,4 @@
-
+from collections import Counter
 
 # Guiao de representacao do conhecimento
 # -- Redes semanticas
@@ -54,6 +54,17 @@ class Member(Relation):
 
 #   Exemplo:
 #   m = Member('socrates','homem')
+
+# 1.15a
+# Subclasse AssocOne
+class AssocOne(Relation):
+    def __init__(self,obj,type):
+        Relation.__init__(self,obj,"member1",type)
+
+# Subclasse AssocNum
+class AssocNum(Relation):
+    def __init__(self,obj,type):
+        Relation.__init__(self,obj,"memberNum",type)
 
 # classe Declaration
 # -- associa um utilizador a uma relacao por si inserida
@@ -166,6 +177,46 @@ class SemanticNetwork:
     def query2(self, entity, rel = None):
         ldecl = [d for d in self.query_local(e1 = entity, rel = rel) if not isinstance(d.relation, Association)]
         return ldecl + self.query(entity, rel)
+
+    # 1.12
+    def query_cancel(self, entity, assoc=None):
+        ldecl = [d for d in self.query_local(e1 = entity, rel = assoc) if isinstance(d.relation, Association)]
+
+        if ldecl == []:
+            parents = [d.relation.entity2 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity1 == entity]
+            for p in parents:
+                ldecl += self.query_cancel(p, assoc)
+        return ldecl
+
+    # 1.13
+    def query_down(self, entity, assoc):
+        sons = [d.relation.entity1 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity2 == entity]
+
+        ldecl = [d for d in self.query_local(e1 = entity, rel=assoc) if isinstance(d.relation, Association)]
+        for s in sons:
+            ldecl += self.query_down(s, assoc)
+        return ldecl
+
+        # resolução stor lsl print
+
+    # 1.14
+    def query_induce(self, entity, assoc):
+        sons = self.query_down(entity, assoc)
+
+        c = Counter(d.relation.entity2 for d in sons)
+        # print(c)
+        t = c.most_common(1)
+        # print(t)
+
+        return t[0][0]
+
+    # 1.15b
+    def query_local_assoc(self, entity, name):
+        # decl = self.query_local(e1=entity, rel=name)
+        pass
+
+
+
 
 
         
