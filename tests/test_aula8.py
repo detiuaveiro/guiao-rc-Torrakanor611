@@ -72,7 +72,7 @@ def sn_net2():
 def compare_decl_lists(l1, l2):
     l1_tuples = [str(d) for d in l1]
     l2_tuples = [str(d) for d in l2]
-    return set(l1_tuples) == set(l2_tuples)
+    return len(l1_tuples)==len(l2_tuples) and set(l1_tuples) == set(l2_tuples)
 
 
 def test_exercicio14(sn_net):

@@ -81,7 +81,7 @@ class SemanticNetwork:
     def __init__(self,ldecl=None):
         self.declarations = [] if ldecl==None else ldecl
     def __str__(self):
-        return my_list2string(self.declarations)
+        return str(self.declarations)
     def insert(self,decl):
         self.declarations.append(decl)
     def query_local(self,user=None,e1=None,rel=None,e2=None):
@@ -96,16 +96,4 @@ class SemanticNetwork:
         for d in self.query_result:
             print(str(d))
 
-
-# Funcao auxiliar para converter para cadeias de caracteres
-# listas cujos elementos sejam convertiveis para
-# cadeias de caracteres
-def my_list2string(list):
-   if list == []:
-       return "[]"
-   s = "[ " + str(list[0])
-   for i in range(1,len(list)):
-       s += ", " + str(list[i])
-   return s + " ]"
-    
 
