@@ -4,6 +4,27 @@ from bayes_net import *
 
 @pytest.fixture
 def bn():
+    """ 
+    #https://dreampuf.github.io/GraphvizOnline/
+
+    digraph G {
+    node [shape=record];
+    "sc" [label="Sobre Carregado\n|0.6"];
+    "pt" [label="Processador Texto\n|0.05"];
+    "cp" [label="Cara Preocupada\n|{{~sc^~pa = 0.01}|{~sc^pa = 0.011}|{sc^~pa = 0.01}|{sc^pa = 0.02}}"];
+    "fr" [label="Frequência Rato\n|{{~pt^~pa=0.01}|{~pt^pa=0.10}|{pt^~pa=0.90}|{pt^pa=0.90}}"];
+    "pa" [label="Precisa Ajuda\n|{{~pt = 0.004}|{pt = 0.25}}"];
+    "cnl" [label="Correio Não Lido\n|{{sc = 0.90}|{~sc = 0.001}}"];
+
+    "pt" -> "fr";
+    "pa" -> "fr";
+    "pt" -> "pa";
+    "pa" -> "cp";
+    "sc" -> "cnl";
+    "sc" -> "cp";
+    } 
+    """
+
     bn = BayesNet()
 
     bn.add('sc',[],0.6)
