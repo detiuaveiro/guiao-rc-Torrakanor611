@@ -1,4 +1,4 @@
-
+from itertools import product
 
 class BayesNet:
 
@@ -27,6 +27,19 @@ class BayesNet:
                 if mothers.issubset(conjunction):
                     prob*=(p if val else 1-p)
         return prob
+
+    def ancestors(self, v):
+        pass
+
+    def conjuncoes(self, v, b, lanc):
+        pass
+
+    # xi -> var
+    def individualProb(self, var, val):
+        mothers = self.dependencies[var].items()
+        print(mothers)
+        
+
 
 
 # Footnote 1:
