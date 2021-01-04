@@ -35,6 +35,17 @@ class Association(Relation):
     def __init__(self,e1,assoc,e2):
         Relation.__init__(self,e1,assoc,e2)
 
+# 1.15a
+# Subclasse AssocOne
+class AssocOne(Relation):
+    def __init__(self,e1,assoc,e2):
+        Relation.__init__(self,e1,assoc,e2)
+
+# Subclasse AssocNum
+class AssocNum(Relation):
+    def __init__(self,e1,assoc,e2):
+        Relation.__init__(self,e1,assoc,float(e2))
+
 #   Exemplo:
 #   a = Association('socrates','professor','filosofia')
 
@@ -54,17 +65,6 @@ class Member(Relation):
 
 #   Exemplo:
 #   m = Member('socrates','homem')
-
-# 1.15a
-# Subclasse AssocOne
-class AssocOne(Relation):
-    def __init__(self,obj,type):
-        Relation.__init__(self,obj,"member1",type)
-
-# Subclasse AssocNum
-class AssocNum(Relation):
-    def __init__(self,obj,type):
-        Relation.__init__(self,obj,"memberNum",type)
 
 # classe Declaration
 # -- associa um utilizador a uma relacao por si inserida
@@ -179,7 +179,7 @@ class SemanticNetwork:
         return ldecl + self.query(entity, rel)
 
     # 1.12
-    def query_cancel(self, entity, assoc=None):
+    def query_cancel(self, entity, assoc):
         ldecl = [d for d in self.query_local(e1 = entity, rel = assoc) if isinstance(d.relation, Association)]
 
         if ldecl == []:
@@ -188,33 +188,80 @@ class SemanticNetwork:
                 ldecl += self.query_cancel(p, assoc)
         return ldecl
 
-    # 1.13
-    def query_down(self, entity, assoc):
-        sons = [d.relation.entity1 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity2 == entity]
 
-        ldecl = [d for d in self.query_local(e1 = entity, rel=assoc) if isinstance(d.relation, Association)]
-        for s in sons:
-            ldecl += self.query_down(s, assoc)
-        return ldecl
+    # 1.13 # query_down não considera as associações locais da entidade do 1o nível
+    def query_down(self, entity, assoc, first=True):
+        # sons = [d.relation.entity1 for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity2 == entity]
 
-        # resolução stor lsl print
+        # ldecl = [d for d in self.query_local(e1 = entity, rel=assoc) if isinstance(d.relation, Association)]
+        # for s in sons:
+        #     ldecl += self.query_down(s, assoc)
+        # return ldecl
+        desc = [self.query_down(d.relation.entity1, assoc, first=False) for d in self.declarations if isinstance(d.relation, (Member, Subtype)) and d.relation.entity2 == entity]
+
+        # receita -> tornar uma lista de listas numa lista com todos os elementos
+        desc_query = [d for sublist in desc for d in sublist]
+
+        local = []
+        if not first:
+            local = self.query_local(e1=entity, rel=assoc)
+
+        return desc_query + local
 
     # 1.14
     def query_induce(self, entity, assoc):
-        sons = self.query_down(entity, assoc)
+        desc = self.query_down(entity, assoc)
 
-        c = Counter(d.relation.entity2 for d in sons)
-        # print(c)
-        t = c.most_common(1)
-        # print(t)
+        values = [d.relation.entity2 for d in desc]
 
-        return t[0][0]
+        c = Counter(values).most_common(1)
+
+        for val, _ in c:    # o '_' quer dizer dont care, estamos a extrair o tuplo, mas só estamos interessados no 1o elemento, o val
+            return val
+
+        return None # não necessário, já retorna none anyways
 
     # 1.15b
-    def query_local_assoc(self, entity, name):
-        # decl = self.query_local(e1=entity, rel=name)
-        pass
+    def query_local_assoc(self, entity, assoc_name):
+        local = self.query_local(e1=entity, rel=assoc_name)
 
+        for l in local:
+            if isinstance(l.relation, AssocNum):
+                values = [d.relation.entity2 for d in local]
+                return sum(values)/len(local)
+            if isinstance(l.relation, AssocOne):
+                val, count = Counter([d.relation.entity2 for d in local]).most_common(1)[0]
+                return val, count/len(local)
+            if isinstance(l.relation, Association):
+                mc = []
+                freq = 0
+                for val, count in Counter([d.relation.entity2 for d in local]).most_common():
+                    mc.append((val, count/len(local)))
+                    freq += count/len(local)
+                    if freq > 0.75:
+                        return mc
+
+    #1.16
+    def query_assoc_value(self, E, A):
+        local = self.query_local(e1=E, rel=A)
+
+        local_values = [l.relation.entity2 for l in local]
+
+        if len(set(local_values)) == 1:
+            return local_values[0]
+
+        all_ = self.query(entity=E, assoc=A)
+
+        predecessor = [a for a in all_ if a not in local]
+
+        predecessor_values = [i.relation.entity2 for i in predecessor]
+
+        def perc(lista, value):
+            if lista == []:
+                return 0
+            return len([l for l in lista if l.relation.entity2 == value])/len(lista)
+
+        return max(local_values + predecessor_values, key=lambda v: (perc(local, v) + perc(predecessor, v)) / 2)
 
 
 
