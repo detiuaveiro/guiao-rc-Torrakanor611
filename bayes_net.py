@@ -36,10 +36,24 @@ class BayesNet:
 
     # xi -> var
     def individualProb(self, var, val):
-        mothers = self.dependencies[var].items()
-        print(mothers)
-        
+        variaveis = [k for k in self.dependencies.keys() if k != var]
 
+        return sum([
+            self.jointProb( [(var, value)] + conj )
+            for conj in self._generate_conjunction(variaveis)
+        ])
+    
+    # o '_' no início de um método como o caso abaixo, por norma indica que, embora o python não defina, este método é público e não deve ser usado fora da classe
+    def _generate_conjunction(self, variaveis):
+        if len(variaveis) == 1:
+            return [ [(variaveis[0], True)], [(variaveis[0], False)] ]
+
+        l = []
+        for c in self._generate_conjunction(variaveis[1:]):
+            l.append([(variaveis[0], True)] + c)
+            l.append([(variaveis[0], False)] + c)
+
+        return l
 
 
 # Footnote 1:
